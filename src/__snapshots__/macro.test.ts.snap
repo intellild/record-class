@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`macro-record-class 1. macro-record-class: 1. macro-record-class 1`] = `
+
+import record from "../macro";
+
+@record
+class SomeRecord {
+  public readonly name?: string = "";
+}
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+class SomeRecord {
+  name = "";
+}
+
+
+`;

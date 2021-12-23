@@ -1,0 +1,39 @@
+{
+  "name": "record-class",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run build && jest",
+    "build": "tsc -p tsconfig.lib.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/intellild/record-class.git"
+  },
+  "author": "intellild",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/intellild/record-class/issues"
+  },
+  "homepage": "https://github.com/intellild/record-class#readme",
+  "devDependencies": {
+    "@babel/core": "^7.16.5",
+    "@babel/plugin-syntax-decorators": "^7.16.5",
+    "@babel/preset-typescript": "^7.16.5",
+    "@types/babel-plugin-macros": "^2.8.5",
+    "@types/node": "^16.0.0",
+    "babel-plugin-macros": "^3.1.0",
+    "babel-plugin-tester": "^10.1.0",
+    "jest": "^27.4.5",
+    "prettier": "^2.5.1",
+    "ts-jest": "^27.1.2",
+    "tslib": "^2.3.1",
+    "typescript": "^4.5.4"
+  },
+  "peerDependencies": {
+    "@babel/core": "^7.16.5",
+    "babel-plugin-macros": "^3.1.0",
+    "tslib": "^2.3.1"
+  }
+}

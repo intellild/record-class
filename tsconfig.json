@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "strict": true,
+    "sourceMap": true,
+    "declaration": true,
+    "sourceRoot": "./src",
+    "outDir": "./",
+    "lib": [
+      "ES2019"
+    ]
+  },
+  "include": ["src/**/*.ts"]
+}
