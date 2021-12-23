@@ -1,14 +1,5 @@
-import { ClassProperty, Expression } from "@babel/types";
 import { createMacro, MacroParams } from "babel-plugin-macros";
-
-function isRecordProperty(node: ClassProperty) {
-  return (
-    !node.static &&
-    !node.declare &&
-    node.readonly &&
-    node.accessibility === "public"
-  );
-}
+import { Processor } from "./lib/processor";
 
 function recordClassMacro({ references }: MacroParams): void {
   references.default.forEach((referencePath) => {
@@ -23,27 +14,8 @@ function recordClassMacro({ references }: MacroParams): void {
     classDeclaration.node.decorators = classDeclaration.node.decorators?.filter(
       (it) => it !== decorator.node
     );
-    const properties = new Map<string, Expression | null | undefined>();
-    classDeclaration.traverse({
-      ClassProperty(property) {
-        if (!isRecordProperty(property.node)) {
-          return;
-        }
-        if (!property.node.optional && !property.node.value) {
-          throw new Error();
-        }
-        const key = property.node.key;
-        if (key.type !== "Identifier") {
-          return;
-        }
-        const value = property.node.value;
-        if (!value && !property.node.optional) {
-          throw new Error();
-        }
-        properties.set(key.name, value);
-        property.node.value = null;
-      },
-    });
+    const processor = new Processor(classDeclaration);
+    processor.process();
   });
 }
 
