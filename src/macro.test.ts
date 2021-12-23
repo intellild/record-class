@@ -7,7 +7,14 @@ pluginTester({
   babelOptions: {
     filename: __filename,
     plugins: [["@babel/plugin-syntax-decorators", { legacy: true }]],
-    presets: ["@babel/preset-typescript"],
+    presets: [
+      [
+        "@babel/preset-typescript",
+        {
+          allowDeclareFields: true,
+        },
+      ],
+    ],
   },
   snapshot: true,
   tests: [

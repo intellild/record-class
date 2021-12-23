@@ -12,7 +12,7 @@ class SomeRecord {
       ↓ ↓ ↓ ↓ ↓ ↓
 
 class SomeRecord {
-  name = "";
+  name;
 }
 
 
