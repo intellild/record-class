@@ -2,19 +2,29 @@
 
 exports[`macro-record-class ignore fields that are not public readonly: ignore fields that are not public readonly 1`] = `
 
+import { Record } from "../lib/record";
 import record from "./proxy.macro";
 
 @record
-export class SomeRecord {
+export class SomeRecord extends Record<SomeRecord, SomeRecord> {
   public field1?: string = "";
   private readonly field2 = false;
+
+  public override $$create(partial: Partial<SomeRecord>): SomeRecord {
+    return new SomeRecord(partial);
+  }
 }
 
       ↓ ↓ ↓ ↓ ↓ ↓
 
-export class SomeRecord {
+import { Record } from "../lib/record";
+export class SomeRecord extends Record {
   field1 = "";
   field2 = false;
+
+  $$create(partial) {
+    return new SomeRecord(partial);
+  }
 
   $$initialize(partial) {}
 
@@ -42,13 +52,16 @@ import record from "./proxy.macro";
 export class SomeRecord extends Record<SomeRecord, SomeRecord> {
   public readonly name?: string = "";
 
-  constructor(partial: SomeRecord) {
+  constructor(partial: Partial<SomeRecord>) {
     super(partial);
   }
 
   public someMethod(): void {
     //
-    const ne = this.merge({});
+  }
+
+  public override $$create(partial: Partial<SomeRecord>): SomeRecord {
+    return new SomeRecord(partial);
   }
 }
 
@@ -64,7 +77,10 @@ export class SomeRecord extends Record {
 
   someMethod() {
     //
-    const ne = this.merge({});
+  }
+
+  $$create(partial) {
+    return new SomeRecord(partial);
   }
 
   $$initialize(partial) {

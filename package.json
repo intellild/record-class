@@ -4,9 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npm run build && jest",
+    "test": "jest",
     "build": "tsc -p tsconfig.lib.json"
   },
+  "files": [
+    "lib",
+    "src",
+    "index.d.ts",
+    "index.js",
+    "index.js.map",
+    "macro.d.ts",
+    "macro.js",
+    "macro.js.map",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/intellild/record-class.git"
