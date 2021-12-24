@@ -1,18 +1,48 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`macro-record-class 1. macro-record-class: 1. macro-record-class 1`] = `
+exports[`macro-record-class ignore fields that are not public readonly: ignore fields that are not public readonly 1`] = `
 
-import record from "../macro";
+import record from "./proxy.macro";
 
 @record
-class SomeRecord {
-  public readonly name?: string = "";
+export class SomeRecord {
+  public field1?: string = "";
+  private readonly field2 = false;
 }
 
       ↓ ↓ ↓ ↓ ↓ ↓
 
-class SomeRecord {
+export class SomeRecord {
+  field1 = "";
+  field2 = false;
+
+  constructor(partial) {}
+}
+
+
+`;
+
+exports[`macro-record-class simple: simple 1`] = `
+
+import record from "./proxy.macro";
+
+@record
+export class SomeRecord {
+  public readonly name?: string = "";
+
+  public someMethod(): void {
+    //
+  }
+}
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+export class SomeRecord {
   name;
+
+  someMethod() {
+    //
+  }
 
   constructor(partial) {
     this.name = partial.name ?? "";

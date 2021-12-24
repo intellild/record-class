@@ -4,8 +4,8 @@ import pluginTester from "babel-plugin-tester";
 pluginTester({
   plugin,
   pluginName: "macro-record-class",
+  filename: __filename,
   babelOptions: {
-    filename: __filename,
     plugins: [["@babel/plugin-syntax-decorators", { legacy: true }]],
     presets: [
       [
@@ -18,13 +18,13 @@ pluginTester({
   },
   snapshot: true,
   tests: [
-    `
-      import record from "../macro";
-      
-      @record
-      class SomeRecord {
-        public readonly name?: string = "";
-      }
-    `,
+    {
+      title: "simple",
+      fixture: "./__fixtures__/1.ts",
+    },
+    {
+      title: "ignore fields that are not public readonly",
+      fixture: "./__fixtures__/2.ts",
+    },
   ],
 });
