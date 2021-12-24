@@ -1,15 +1,8 @@
-import { NodePath, parse } from "@babel/core";
+import { NodePath } from "@babel/core";
 import template from "@babel/template";
-import {
-  ClassDeclaration,
-  ClassMethod,
-  ClassProperty,
-  Expression,
-  Statement,
-} from "@babel/types";
 import * as t from "@babel/types";
 
-function isRecordProperty(node: ClassProperty) {
+function isRecordProperty(node: t.ClassProperty) {
   return (
     !node.static &&
     !node.declare &&
@@ -18,23 +11,44 @@ function isRecordProperty(node: ClassProperty) {
   );
 }
 
-const initStatementWithDefaultValue = template.statement(
-  "this.NAME = partial.NAME ?? DEFAULT_VALUE;"
+const mergePropertyValue = template.expression("partial.NAME ?? this.NAME");
+
+const assignWithDefault = template.statement(
+  "TARGET.NAME = SOURCE.NAME ?? DEFAULT_VALUE;"
 );
 
-const initStatement = template.statement("this.NAME = partial.NAME;");
+const assign = template.statement("TARGET.NAME = SOURCE.NAME;");
+
+const methodsTemplate = template(`
+  class Template {
+    $$initialize(partial) {
+      INITIALIZE
+    }
+    merge(partial) {
+      return this.$$create(MERGE)
+    }
+    pipe(list) {
+      let next = FIELDS;
+      list.forEach(f => {
+        Object.assign(next, f(next))
+      })
+    }
+  }
+`);
 
 export class Processor {
   private readonly properties = new Map<
     string,
-    Expression | null | undefined
+    t.Expression | null | undefined
   >();
 
-  constructor(private readonly classDeclaration: NodePath<ClassDeclaration>) {}
+  constructor(
+    private readonly classDeclaration: NodePath<t.ClassDeclaration>
+  ) {}
 
   public process() {
     this.processProperties();
-    this.processConstructor();
+    this.insertMethods();
   }
 
   private processProperties() {
@@ -60,53 +74,45 @@ export class Processor {
     });
   }
 
-  private processConstructor() {
-    const constructor = this.classDeclaration.find(
-      (it) => it.isClassMethod() && it.node.kind === "constructor"
-    ) as NodePath<ClassMethod> | null;
-    if (!constructor) {
-      this.classDeclaration.node.body.body.push(this.createConstructor());
-    }
-  }
-
-  private createConstructor(): ClassMethod {
-    const file = parse(`
-        class Foo {
-          constructor(partial) {
-          
-          }
-        }
-      `);
-    if (!file || file.type !== "File") {
-      throw new Error();
-    }
-    const { program } = file;
-    const classDeclaration = program.body[0];
-    if (!classDeclaration || classDeclaration.type !== "ClassDeclaration") {
-      throw new Error();
-    }
-    const constructor = classDeclaration.body.body[0];
-    if (
-      !constructor ||
-      constructor.type !== "ClassMethod" ||
-      constructor.kind !== "constructor"
-    ) {
-      throw new Error();
-    }
+  private insertMethods(): void {
+    const INITIALIZE: t.Statement[] = [];
+    const mergeProperties: t.ObjectProperty[] = [];
+    const fieldsProperties: t.ObjectProperty[] = [];
     this.properties.forEach((value, name) => {
-      let statement: Statement;
-      if (value) {
-        statement = initStatementWithDefaultValue({
+      const init = value
+        ? assignWithDefault({
+            TARGET: t.thisExpression(),
+            NAME: t.identifier(name),
+            SOURCE: t.identifier("partial"),
+            DEFAULT_VALUE: value,
+          })
+        : assign({
+            TARGET: t.thisExpression(),
+            SOURCE: t.identifier("partial"),
+            NAME: t.identifier(name),
+          });
+      INITIALIZE.push(init);
+      const mergeProperty = t.objectProperty(
+        t.identifier(name),
+        mergePropertyValue({
           NAME: t.identifier(name),
-          DEFAULT_VALUE: value,
-        });
-      } else {
-        statement = initStatement({
-          NAME: t.identifier(name),
-        });
-      }
-      constructor.body.body.push(statement);
+        })
+      );
+      mergeProperties.push(mergeProperty);
+      const fieldsProperty = t.objectProperty(
+        t.identifier(name),
+        t.memberExpression(t.thisExpression(), t.identifier(name))
+      );
+      fieldsProperties.push(fieldsProperty);
     });
-    return constructor;
+    const klass = methodsTemplate({
+      INITIALIZE,
+      MERGE: t.objectExpression(mergeProperties),
+      FIELDS: t.objectExpression(fieldsProperties),
+    });
+    if (Array.isArray(klass) || klass.type !== "ClassDeclaration") {
+      throw new Error();
+    }
+    this.classDeclaration.node.body.body.push(...klass.body.body);
   }
 }
