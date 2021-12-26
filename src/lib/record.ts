@@ -1,7 +1,7 @@
 export abstract class Record<Interface, Class extends Interface> {
   public declare pipe: (
     list: ((value: Interface) => Partial<Interface>)[]
-  ) => void;
+  ) => Class;
   public declare merge: (partial: Partial<Interface>) => Class;
   private declare $$initialize: (partial: Partial<Interface>) => void;
 
